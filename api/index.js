@@ -1,13 +1,25 @@
+const querystring = require('querystring');
 const axios = require('axios');
+const config = require('../configs/api.json');
 
-const http = axios.create({
-  baseURL: 'https://randomuser.me/api/'
-});
+const {
+  baseURL,
+  get: { users: usersGET }
+} = config;
 
-module.exports.loadUsers = async () => {
+const http = axios.create({ baseURL });
+
+module.exports.loadUsers = async (options = {}) => {
+  const queryParams = {
+    ...usersGET,
+    ...options
+  };
+
+  console.log(querystring.stringify(queryParams));
+
   const {
-    data: { results }
-  } = await http.get('?results=100&seed=abcderr&page=1');
+    data: { results: users }
+  } = await http.get(`?${querystring.stringify(queryParams)}`);
 
-  return results;
+  return users;
 };
