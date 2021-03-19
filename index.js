@@ -7,9 +7,9 @@ async function start () {
   await client.connect();
 
   const users = await loadUsers();
+  await User.createTableIfNotExist();
   const result = await User.bulkCreate(users);
   console.log(result);
 
   await client.end();
 }
-
