@@ -33,7 +33,7 @@ VALUES (
     'Testovich1',
     'test1@mail.com',
     true,
-    '1999-1-25',
+    '1599-1-25',
     0.6
   ),
   (
