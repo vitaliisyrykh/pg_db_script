@@ -1,3 +1,5 @@
+DROP TABLE "users";
+
 CREATE TABLE "users" (
   id serial PRIMARY KEY,
   first_name varchar(64) NOT NULL,
@@ -22,76 +24,54 @@ ADD COLUMN "weight" int CHECK (
     "weight" BETWEEN 0 AND 300
   );
 /* 
- CRUD    SQL
  
- CREATE  INSERT DML - manipulation
- READ    SELECT DQL - query
- UPDATE  UPDATE DML - manipulation
- DELETE  DELETE DML - manipulation
- */
-/* */
-SELECT *
-FROM "users"
-WHERE "id" = 600;
-/*  */
-UPDATE "users"
-SET "weight" = 68
-WHERE "id" = 600
-RETURNING "weight",
-  "id";
-/*  */
-DELETE FROM "users"
-WHERE "id" = 600
-RETURNING *;
-/* 
- 1. get all woman
- 2. get all man
- 3. get all adult    tip:  users age(), make_interval(), >,<, =, !=,......
- 4. get all adult woman
- 5. get all users: filter age > 20 and < 40
- 6. get all who were born in September
- 7. get all users who were born 1 November
- */
-/* 1 */
-SELECT *
-FROM "users"
-WHERE "is_male" = false;
-/* 2 */
-SELECT *
-FROM "users"
-WHERE "is_male" = true;
-/* 3 */
-SELECT *
-FROM "users"
-WHERE age("birthday") >= make_interval(18)
-  AND "is_male" = false;
-/* 5 */
-SELECT *
-FROM "users"
-WHERE age("birthday") BETWEEN make_interval(20) AND make_interval(40);
-/*  */
-SELECT *
-FROM "users"
-WHERE "is_male" = false
-LIMIT 10 OFFSET 0;
-/*  */
-SELECT "first_name" AS "Имя",
-  "last_name" AS "Фамилия",
-  "email" AS "Почта"
-FROM "users" AS "u"
-WHERE "u"."id" = 100;
-/*  */
-SELECT concat("first_name", ' ', "last_name") AS "Full name"
-FROM "users";
-/* 
- ВСЕ пользователи, полное имя которых занимает больше 15 символов.
+ Агрегатные функции
  
- char_length
- concat
- >
- 15
+ min - вернет минимальное
+ max - максимальное
+ sum - аккумулятор
+ count - считает кол-во кортежей
+ avg - среднее значение
+ 
  */
-SELECT *,
-  char_length(concat("first_name", ' ', "last_name")) as "Full name"
+SELECT avg("height"),
+  "is_male"
 FROM "users"
-WHERE char_length(concat("first_name", ' ', "last_name")) > 20;
+WHERE extract(
+    'month'
+    from age("birthday")
+  ) = 1
+GROUP BY "is_male";
+/* 
+ средний рост пользователей
+ средний рост мужчин и женщин
+ минимальный рост мужчин и женщин
+ минимальный, максимальный и средний рост мужчины и женщины
+ Кол-во людей родившихся 1 января 1970 года
+ Кол-во людей с определённым именем -> John | *
+ Кол-во людей в возрасте от 20 до 30 лет
+ */
+SELECT min(height),
+  max(height),
+  avg(height),
+  "is_male"
+FROM "users"
+GROUP BY "is_male";
+/*  */
+SELECT count(*)
+FROM "users"
+WHERE "birthday" = '1955/08/26';
+/*  */
+SELECT count(*)
+FROM "users"
+WHERE extract(
+    'year'
+    from age("birthday")
+  ) BETWEEN 20 AND 30;
+/*  */
+SELECT *
+FROM "users"
+WHERE "id" IN (123,534,210,1000,510,348);
+/*  */
+/* phones: brand, model, price, quantity */
+/* users can buy phones */

@@ -1,96 +1,86 @@
+CREATE TABLE "users" (
+  id serial PRIMARY KEY,
+  first_name varchar(64) NOT NULL,
+  last_name varchar(64) NOT NULL,
+  email varchar(256) NOT NULL CHECK (email != ''),
+  is_male boolean NOT NULL,
+  birthday date NOT NULL CHECK (
+    birthday < current_date
+    AND birthday > '1900/1/1'
+  ),
+  height numeric(3, 2) NOT NULL CHECK (
+    height > 0.20
+    AND height < 2.5
+  ),
+  CONSTRAINT "CK_FULL_NAME" CHECK (
+    first_name != ''
+    AND last_name != ''
+  )
+);
 ALTER TABLE "users"
 ADD COLUMN "weight" int CHECK(
     "weight" BETWEEN 0 AND 500
   );
-/*
- CRUD      SQL
- 
- READ      SELECT  -  query
- 
- CREATE    INSERT  -  manipulation
- UPDATE    UPDATE  -  manipulation
- DELETE    DELETE  -  manipulation
+
+/* 
  */
-SELECT *
-FROM "users"
-WHERE "is_male" = false;
-/*  ВСЕ ЮЗЕРЫ, С ЧЕТНЫМИ ID  */
-SELECT *
-FROM "users"
-WHERE "id" % 2 = 0;
-/* ВСЕ ЮЗЕРЫ МУЖСКОГО ПОЛА С НЕЧЁТНЫМ ID  */
-SELECT *
-FROM "users"
-WHERE "id" % 2 = 1
-  AND "is_male" = true;
+CREATE TABLE "phones"(
+  "id" serial PRIMARY KEY,
+  "brand" varchar(64) NOT NULL,
+  "model" varchar(64) NOT NULL,
+  "price" decimal(10, 2) NOT NULL CHECK("price" >= 0),
+  "quantity" int NOT NULL CHECK("quantit" > 0) UNIQUE("brand", "model")
+);
+/*  */
+CREATE TABLE "orders"(
+  "id" serial PRIMARY KEY,
+  "user_id" int REFERENCES "users"("id")
+);
+/*  */
+CREATE TABLE "phones_to_orders"(
+  phone_id int REFERENCES "phones"("id"),
+  order_id int REFERENCES "orders"("id"),
+  quantity int NOT NULL CHECK("quantity" > 0),
+  PRIMARY KEY (phone_id, order_id)
+);
+
+
+--===========
 /*  */
 UPDATE "users"
-SET "weight" = 400
-WHERE "id" = 2006
-RETURNING "id",
-  "weight",
-  "email";
+SET "weight" = 70
+WHERE "id" = 3333;
 /*  */
-DELETE FROM "users"
-WHERE "id" = 2200
-RETURNING *;
+SELECT *
+FROM "users"
+WHERE "weight" = 400;
 /* 
- 1. get all man
- 2. get all woman
- 3. get all adult users        tip: 9 chapter
- 4. get all adult woman
- 5. get all users age > 20 & age < 40
- 6. get all users with age > 20 & height > 1.8
- 7. get all users: were born September
- 8. get all users: born 1 November
- 9. delete all <30 y
+ Агрегатные функции
+ 
+ max
+ min
+ sum - аккумулятор
+ count - считает строки
+ avg - среднее значение
+ 
  */
-SELECT *
+SELECT avg("weight"),
+  "is_male"
 FROM "users"
-WHERE age("birthday") > make_interval(40)
-  AND "is_male" = false;
-/*  */
-SELECT *
+WHERE birthday > '1990/1/1'
+GROUP BY "is_male";
+/* 
+ средний рост пользователей
+ средний рост мужчин и женщин
+ минимальный рост мужчины и женщины
+ минимальный, максимальный и средний рост мужчины и женщины
+ Кол-во  людей родившихся 1 января 1970 года
+ Кол-во людей с определённым именем
+ Кол-во людей в возрасте от 20 до 30 лет
+ */
+SELECT count(id)
 FROM "users"
-WHERE age("birthday") BETWEEN make_interval(20) AND make_interval(40);
-/*  */
-SELECT *
-FROM "users"
-WHERE extract (
-    'month'
-    from "birthday"
-  ) = 9;
-/* */
-SELECT "id" AS "Порядковый номер",
-  "first_name" AS "Имя",
-  "last_name" AS "Фамилия",
-  "email" AS "Почта"
-FROM "users" AS "u"
-WHERE "u"."id" = 2890;
-/* PAGINATION */
-SELECT *
-FROM "users"
-LIMIT 15 OFFSET 45;
-/*  */
-SELECT "id",
-  concat("first_name", ' ', "last_name") AS "Full name",
-  "email"
-FROM "users"
-LIMIT 10;
-/* Получить всех пользователей с длинной полного имени больше 15 символов  */
-SELECT "id",
-  concat("first_name", ' ', "last_name") AS "Full name",
-  "email"
-FROM "users"
-WHERE char_length(concat("first_name", ' ', "last_name")) > 15
-LIMIT 10;
-/*  */
-SELECT *
-FROM (
-    SELECT "id",
-      concat("first_name", ' ', "last_name") AS "Full name",
-      "email"
-    FROM "users"
-  ) AS "FN"
-WHERE char_length("FN"."Full name") > 20;
-/*  */
+WHERE extract(
+    'year'
+    from age("birthday")
+  ) BETWEEN 20 AND 30;
