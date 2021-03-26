@@ -196,6 +196,39 @@ GROUP BY u."id", t."isDone";
 
 
 
+CREATE TABLE "products"(
+  "codeProduct" int PRIMARY KEY,
+  "nameProduct" varchar(120) NOT NULL UNIQUE,
+  "price" int NOT NULL CHECK("price" > 0)
+);
+
+CREATE TABLE "customers" (
+  "id" serial PRIMARY KEY,
+  "nameCustomer" varchar(120) NOT NULL ,
+  "adress" jsonb,
+  "phoneNumber" varchar(11) NOT NULL,
+  UNIQUE ("adress", "phoneNumber", "nameCustomer")
+);
+
+CREATE TABLE "customer_to_contracts"(
+  "id" serial PRIMARY KEY,
+  "customerId" int REFERENCES "customers"("id"),
+  "contractId" int REFERENCES "contracts"("id"),
+);
+
+CREATE TABLE "contracts"(
+  "id" serial PRIMARY KEY,
+  "dateOfConclusion" timestamp NOT NULL DEFAULT current_timestamp,
+);
+
+CREATE TABLE "orders"(
+  ""
+)
+
+
+
+
+
 
 
 
