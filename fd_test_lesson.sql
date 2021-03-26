@@ -171,27 +171,29 @@ WHERE co."count" > (
   SELECT avg(co."count")
   FROM count_orders AS co
 );
-
+DROP TABLE "tasks";
 CREATE TABLE "tasks"(
   "id" serial PRIMARY KEY,
   "heading" varchar(60) NOT NULL,
-  
+  "userId" int REFERENCES "users"("id"),
+  "isDone" boolean NOT NULL,
+  "createdAt" timestamp NOT NULL DEFAULT current_timestamp,
   "body" varchar(300) NOT NULL 
 );
 
-CREATE TABLE "tasks_to_users"(
-  "id" serial PRIMARY KEY,
-  "userId" int REFERENCES "users"("id"),
-  "taskId" int REFERENCES "tasks" ("id")
-);
+INSERT INTO "tasks"("heading", "body","userId","isDone")
+VALUES ('some heading', 'some text body',4,false),
+('some heading 2', 'some text body2',5,true),
+('some heading 3', 'some text body3',12,false),
+('some heading 4', 'some text body4', 4, true),
+('some heading5', 'some text body5', 5, true);
 
-INSERT INTO "tasks"("heading", "body")
-VALUES ('some heading', 'some text body'),
-('some heading 2', 'some text body2'),
-('some heading 3', 'some text body3');
+SELECT u."id", count("isDone"), t."isDone"
+FROM "users" AS u
+  JOIN "tasks" AS t ON t."userId" = u."id"
+WHERE t."isDone" = true
+GROUP BY u."id", t."isDone";
 
-INSERT INTO tasks_to_users ("userId", "taskId")
-VALUES (3,1),(3,2),(1,3);
 
 
 
