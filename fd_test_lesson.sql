@@ -194,39 +194,60 @@ FROM "users" AS u
 WHERE t."isDone" = true
 GROUP BY u."id", t."isDone";
 
+CREATE DATABASE "normal";
 
 
-CREATE TABLE "products"(
-  "codeProduct" int PRIMARY KEY,
-  "nameProduct" varchar(120) NOT NULL UNIQUE,
-  "price" int NOT NULL CHECK("price" > 0)
-);
+SELECT *, 
+  (CASE
+    WHEN "brand" = 'IPhone' THEN 'iphone'
+    ELSE 'not iphone'
+    END
+    ) AS "isIphone"
+FROM "phones";
 
-CREATE TABLE "customers" (
-  "id" serial PRIMARY KEY,
-  "nameCustomer" varchar(120) NOT NULL ,
-  "adress" jsonb,
-  "phoneNumber" varchar(11) NOT NULL,
-  UNIQUE ("adress", "phoneNumber", "nameCustomer")
-);
+SELECT "brand", "model",(
+  CASE
+    WHEN "price" < 10000 THEN 'chipest'
+    WHEN "price" BETWEEN 10000 AND 20000 THEN 'expensive'
+    WHEN "price" > 20000 THEN 'flagman'
+    END
+) AS "chipesr or expensive"
+FROM "phones";
 
-CREATE TABLE "customer_to_contracts"(
-  "id" serial PRIMARY KEY,
-  "customerId" int REFERENCES "customers"("id"),
-  "contractId" int REFERENCES "contracts"("id"),
-);
+SELECT u.id, u.email, count(o.id),(
+  CASE 
+    WHEN count(o.id) >=5 THEN 'goodUser'
+    WHEN count(o.id) >=2 THEN 'active User'
+    ELSE 'buyer'
+    END
+)FROM "orders" o
+  JOIN "users" u ON u.id = o."userId"
+  GROUP BY u.id;
 
-CREATE TABLE "contracts"(
-  "id" serial PRIMARY KEY,
-  "dateOfConclusion" timestamp NOT NULL DEFAULT current_timestamp,
-);
+SELECT * FROM "users" u
+WHERE u.id  IN (SELECT "orders"."userId" FROM orders);
 
-CREATE TABLE "orders"(
-  ""
-)
+CREATE VIEW "ordersWithCoast" AS (
+SELECT o.id, o."userId", sum(p.price * pto.quantity) AS "total"
+FROM orders o
+  JOIN phones_to_orders AS pto ON o.id = pto."orderId"
+  JOIN phones AS p ON p.id = pto."phoneId"
+GROUP BY o.id);  
 
-
-
+CREATE VIEW "user_total_check" AS (
+SELECT owc.* FROM "ordersWithCoast" owc
+JOIN users u ON owc."userId" = u.id);
+DROP VIEW "data_from_users";
+CREATE VIEW "data_from_users"  AS (SELECT u.id, 
+  concat(u."firstName", ' ', u."lastName") AS "fullName", 
+  (CASE
+    WHEN "isMale" = true THEN 'Male'
+    WHEN "isMale" = false THEN 'Female'
+    ELSE 'UNKNOWN'
+    END
+  ) AS "gender", 
+  age(u."birthday")
+FROM users u);  
 
 
 
