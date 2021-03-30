@@ -249,6 +249,42 @@ CREATE VIEW "data_from_users"  AS (SELECT u.id,
   age(u."birthday")
 FROM users u);  
 
+-- add column
+ALTER TABlE tasks
+ADD COLUMN deadline timestamp NOT NULL CHECK(deadline >= current_timestamp) DEFAULT current_timestamp;
+
+--DELETE CONSTRAINT
+ALTER TABlE tasks
+DROP CONSTRAINT 'имя констрейнта'
+
+ALTER TABlE tasks
+ALTER COLUMN deadline DROP NOT NULL;
+
+--ADD CONSTRAINT
+ALTER TABlE tasks
+ADD CONSTRAINT constraint_name CHECK (task != ' ');
+
+--delete column 
+ALTER TABlE tasks
+DROP COLUMN column_name;
+
+--change defult
+ALTER TABlE tasks
+ALTER COLUMN idDone DROP DEFAULT
+ALTER COLUMN isDone SET DEFAULT = false;
+
+--change type data
+ALTER TABlE tasks
+ALTER COLUMN task type text;
+
+--change column_name
+ALTER TABlE tasks
+RENAME COLUMN task TO body;
+
+--Change table_name
+ALTER TABlE tasks
+RENAME   TO users_tasks;
+
 
 
 
