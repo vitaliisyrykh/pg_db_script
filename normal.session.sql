@@ -242,7 +242,7 @@ FROM wf.departments d
    */
 SELECT e.*,
   d.name,
-  round(avg(e.salary) OVER (PARTITION BY d.id)) as "avg_dep_salary",
+  round(sum(e.salary) OVER (PARTITION BY d.id)) as "avg_dep_salary",
   sum(e.salary) OVER ()
 FROM wf.departments d
   JOIN wf.employees e ON e.department_id = d.id;
